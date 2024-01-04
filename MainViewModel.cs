@@ -30,7 +30,14 @@ namespace FileFinder
             FindFilesCommand = new RelayCommand(FindFiles);
             BrowseSourceCommand = new RelayCommand(BrowseSource);
             BrowseDestinationCommand = new RelayCommand(BrowseDestination);
-            Files = new ObservableCollection<string>();
+            Files = new ObservableCollection<FileModel>();
+
+            SetDefaults();
+        }
+
+        private void SetDefaults()
+        {
+            ExtensionList = "jpg";
         }
 
         private string _sourceFolderPath;
@@ -77,6 +84,8 @@ namespace FileFinder
         }
 
         private string _destinationFolderPath;
+        private ObservableCollection<FileModel> files;
+
         public string DestinationFolderPath
         {
             get => _destinationFolderPath;
@@ -88,7 +97,8 @@ namespace FileFinder
             }
         }
 
-        public ObservableCollection<string> Files { get; set; }
+        //public ObservableCollection<string> Files { get; set; }
+        public ObservableCollection<FileModel> Files { get => files; set => files = value; }
 
         public ICommand FindFilesCommand { get; }
         public ICommand BrowseSourceCommand { get; }
@@ -101,7 +111,8 @@ namespace FileFinder
 
             if (Directory.Exists(SourceFolderPath) && (string.IsNullOrWhiteSpace(ExtensionList) is false))
             {
-                Files = new ObservableCollection<string>(_model.SearchFiles(SourceFolderPath, ExtensionList));
+                var tmp = _model.SearchFiles(SourceFolderPath, ExtensionList);
+                Files = new ObservableCollection<FileModel>(FileFinderModel.ToFileModel(tmp));
                 //var jpgFiles = _model.FindJpgFiles(SourceFolderPath);
                 //foreach (var file in jpgFiles)
                 //{
@@ -135,12 +146,12 @@ namespace FileFinder
             {
                 var totalFiles = Files.Count;
                 var currentFileIndex = 0;
-                foreach (var filePath in Files)
+                foreach (var file in Files)
                 {
                     try
                     {
-                        string fileName = Path.GetFileName(filePath);
-                        DateTime creationDate = File.GetCreationTime(filePath);
+                        string fileName = Path.GetFileName(file.FileName);
+                        DateTime creationDate = File.GetCreationTime(file.Path);
 
                         string yearMonthFolder = Path.Combine(DestinationFolderPath, creationDate.ToString("yyyy-MM"));
                         string destinationPath = Path.Combine(yearMonthFolder, fileName);
@@ -150,7 +161,7 @@ namespace FileFinder
                             Directory.CreateDirectory(yearMonthFolder);
                         }
 
-                        File.Copy(filePath, destinationPath);
+                        File.Copy(file.Path, destinationPath);
                         currentFileIndex++;
                         Progress = (double)currentFileIndex / totalFiles * 100;
                     }

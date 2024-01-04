@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace FileFinder
 {
-    internal class FileModel
+    public class FileModel(string path)
     {
-        public string FileName { get; set; }
-        public string Path { get; set; }
+        public string FileName { get; set; } = System.IO.Path.GetFileName(path);
+        public string Path { get; set; } = path;
+        public override string ToString()
+        {
+            return $"{FileName}: {Path}";
+        }
     }
 }

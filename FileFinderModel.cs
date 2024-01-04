@@ -23,5 +23,13 @@ namespace FileFinder
             catch { }
             return files;
         }
+
+        public static IEnumerable<FileModel> ToFileModel(List<string> files)
+        {
+            foreach(var file in files)
+            {
+                yield return new FileModel(file);
+            } 
+        }
     }
 }

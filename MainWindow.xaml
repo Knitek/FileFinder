@@ -43,13 +43,17 @@
             </DockPanel>
 
         </StackPanel>
-        <ListView Grid.Row="1"   ItemsSource="{Binding Files}" ScrollViewer.VerticalScrollBarVisibility="Visible" Margin="5">
-            <!--<ListView.View>
-         <GridView>
-             <GridViewColumn Width="500" Header="File Path" DisplayMemberBinding="{Binding}" />
-         </GridView>
-     </ListView.View>-->
-        </ListView>
+        <ListBox Grid.Row="1" Name="fileListBox" ItemsSource="{Binding Files}" Margin="10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding FileName}">
+                        <TextBlock.ToolTip>
+                            <Image Source="{Binding Path}" Width="200" Height="200" />
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         <ProgressBar Grid.Row="2" Name="progressBar" Value="{Binding Progress, Mode=OneWay}" Maximum="100" Margin="0,10,0,0"/>
     </Grid>
 </Window>
