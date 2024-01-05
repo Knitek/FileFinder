@@ -43,10 +43,16 @@
             </DockPanel>
 
         </StackPanel>
-        <ListBox Grid.Row="1" Name="fileListBox" ItemsSource="{Binding Files}" Margin="10">
+        <ListBox Grid.Row="1" Name="fileListBox" ItemsSource="{Binding Files}" SelectedItem="{Binding SelectedFile}" Margin="10">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Pomiń plik" Command="{Binding IgnoreFileCommand}"/>
+                    <MenuItem Header="Pomiń katalog" Command="{Binding IgnoreFolderCommand}"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding FileName}">
+                    <TextBlock Text="{Binding RelativePath}">
                         <TextBlock.ToolTip>
                             <Image Source="{Binding Path}" Width="200" Height="200" />
                         </TextBlock.ToolTip>

@@ -11,7 +11,8 @@ namespace FileFinder
     public class MainViewModel : ViewModelBase
     {
         private double _progress;
-
+        private FileModel _selectedFile;
+        private readonly FileFinderModel _model;
         public double Progress
         {
             get => _progress;
@@ -21,8 +22,23 @@ namespace FileFinder
                 OnPropertyChanged(nameof(Progress));
             }
         }
-        private readonly FileFinderModel _model;
+        public FileModel SelectedFile
+        {
+            get => _selectedFile;
+            set
+            {
+                _selectedFile = value;
+                OnPropertyChanged(nameof(SelectedFile));
+            }
+        }
+        public ObservableCollection<FileModel> Files { get => files; set => files = value; }
 
+        public ICommand FindFilesCommand { get; }
+        public ICommand BrowseSourceCommand { get; }
+        public ICommand MoveFilesCommand { get; }
+        public ICommand BrowseDestinationCommand { get; }
+        public ICommand IgnoreFileCommand { get; }
+        public ICommand IgnoreFolderCommand { get; }
         public MainViewModel()
         {
             _model = new FileFinderModel();
@@ -30,11 +46,24 @@ namespace FileFinder
             FindFilesCommand = new RelayCommand(FindFiles);
             BrowseSourceCommand = new RelayCommand(BrowseSource);
             BrowseDestinationCommand = new RelayCommand(BrowseDestination);
+            IgnoreFileCommand = new RelayCommand(IgnoreFile);
+            IgnoreFolderCommand = new RelayCommand(IgnoreFolder);
             Files = new ObservableCollection<FileModel>();
 
             SetDefaults();
         }
-
+        private void IgnoreFile()
+        {
+            Files.Remove(SelectedFile);
+            OnPropertyChanged(nameof(Files));
+        }
+        private void IgnoreFolder()
+        {
+            var folder = string.Join(System.IO.Path.DirectorySeparatorChar, SelectedFile.RelativePath.Split(System.IO.Path.DirectorySeparatorChar).SkipLast(1));
+            if (string.IsNullOrWhiteSpace(folder)) return;
+            Files = new ObservableCollection<FileModel>(Files.Where(x => x.RelativePath.Contains(folder) is false));
+            OnPropertyChanged(nameof(Files));
+        }
         private void SetDefaults()
         {
             ExtensionList = "jpg";
@@ -98,12 +127,7 @@ namespace FileFinder
         }
 
         //public ObservableCollection<string> Files { get; set; }
-        public ObservableCollection<FileModel> Files { get => files; set => files = value; }
-
-        public ICommand FindFilesCommand { get; }
-        public ICommand BrowseSourceCommand { get; }
-        public ICommand MoveFilesCommand { get; }
-        public ICommand BrowseDestinationCommand { get; }
+        
 
         private void FindFiles()
         {
@@ -113,11 +137,7 @@ namespace FileFinder
             {
                 var tmp = _model.SearchFiles(SourceFolderPath, ExtensionList);
                 Files = new ObservableCollection<FileModel>(FileFinderModel.ToFileModel(tmp));
-                //var jpgFiles = _model.FindJpgFiles(SourceFolderPath);
-                //foreach (var file in jpgFiles)
-                //{
-                //    Files.Add(file);
-                //}
+                foreach(var file in Files) { file.RelativePath = file.Path.Remove(0,SourceFolderPath.Length+1); }
             }
             OnPropertyChanged(nameof(Files));
         }

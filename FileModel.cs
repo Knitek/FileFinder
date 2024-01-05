@@ -10,6 +10,7 @@ namespace FileFinder
     {
         public string FileName { get; set; } = System.IO.Path.GetFileName(path);
         public string Path { get; set; } = path;
+        public string RelativePath { get; set; }
         public override string ToString()
         {
             return $"{FileName}: {Path}";
