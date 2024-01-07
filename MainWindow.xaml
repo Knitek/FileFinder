@@ -54,7 +54,7 @@
                 <DataTemplate>
                     <TextBlock Text="{Binding RelativePath}">
                         <TextBlock.ToolTip>
-                            <Image Source="{Binding Path}" Width="200" Height="200" />
+                            <Image Source="{Binding ImagePath}" Width="200" Height="200" />
                         </TextBlock.ToolTip>
                     </TextBlock>
                 </DataTemplate>

@@ -13,6 +13,7 @@ namespace FileFinder
         private double _progress;
         private FileModel _selectedFile;
         private readonly FileFinderModel _model;
+        private Action<double> ProgressUpdate { get; set; }
         public double Progress
         {
             get => _progress;
@@ -42,7 +43,8 @@ namespace FileFinder
         public MainViewModel()
         {
             _model = new FileFinderModel();
-            MoveFilesCommand = new RelayCommand(MoveFiles);
+            ProgressUpdate = new Action<double>((double d) => { this.Progress = d; });
+            MoveFilesCommand = new RelayCommand(CopyFiles);
             FindFilesCommand = new RelayCommand(FindFiles);
             BrowseSourceCommand = new RelayCommand(BrowseSource);
             BrowseDestinationCommand = new RelayCommand(BrowseDestination);
@@ -160,7 +162,31 @@ namespace FileFinder
             return result != DialogResult.Abort ? folderDialog.SelectedPath : string.Empty;
 
         }
-        private void MoveFiles()
+        private async void CopyFiles()
+        {
+            if (Files.Count == 0)
+            {
+                System.Windows.MessageBox.Show("Brak plików do przeniesienia.", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(SourceFolderPath))
+            {
+                System.Windows.MessageBox.Show("Proszę wybrać folder docelowy.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Progress = 0;
+            try
+            {
+                await CopyFilesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Wystąpił błąd podczas przenoszenia plików: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CopyFilesAsync()
         {
             if (Directory.Exists(DestinationFolderPath))
             {
@@ -180,10 +206,9 @@ namespace FileFinder
                         {
                             Directory.CreateDirectory(yearMonthFolder);
                         }
-
-                        File.Copy(file.Path, destinationPath);
+                        await Task.Run(() => File.Copy(file.Path, destinationPath));
                         currentFileIndex++;
-                        Progress = (double)currentFileIndex / totalFiles * 100;
+                        ProgressUpdate((double)currentFileIndex / totalFiles * 100);
                     }
                     catch (Exception ex)
                     {
