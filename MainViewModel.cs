@@ -11,6 +11,7 @@ namespace FileFinder
     public class MainViewModel : ViewModelBase
     {
         private double _progress;
+        private string _progressText;
         private FileModel _selectedFile;
         private readonly FileFinderModel _model;
         private Action<double> ProgressUpdate { get; set; }
@@ -21,6 +22,15 @@ namespace FileFinder
             {
                 _progress = value;
                 OnPropertyChanged(nameof(Progress));
+            }
+        }
+        public string ProgressText
+        {
+            get => _progressText;
+            set
+            {
+                _progressText = value;
+                OnPropertyChanged(nameof(ProgressText));
             }
         }
         public FileModel SelectedFile
@@ -43,7 +53,7 @@ namespace FileFinder
         public MainViewModel()
         {
             _model = new FileFinderModel();
-            ProgressUpdate = new Action<double>((double d) => { this.Progress = d; });
+            ProgressUpdate = new Action<double>((double d) => { this.Progress = ((double)d / Files.Count * 100); ProgressText = d.ToString() + "/" + Files.Count.ToString(); });
             MoveFilesCommand = new RelayCommand(CopyFiles);
             FindFilesCommand = new RelayCommand(FindFiles);
             BrowseSourceCommand = new RelayCommand(BrowseSource);
@@ -133,6 +143,8 @@ namespace FileFinder
 
         private void FindFiles()
         {
+            Progress = 0;
+            ProgressText = string.Empty;
             Files.Clear();
 
             if (Directory.Exists(SourceFolderPath) && (string.IsNullOrWhiteSpace(ExtensionList) is false))
@@ -208,7 +220,7 @@ namespace FileFinder
                         }
                         await Task.Run(() => File.Copy(file.Path, destinationPath));
                         currentFileIndex++;
-                        ProgressUpdate((double)currentFileIndex / totalFiles * 100);
+                        ProgressUpdate(currentFileIndex);
                     }
                     catch (Exception ex)
                     {
