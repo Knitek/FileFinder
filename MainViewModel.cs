@@ -68,6 +68,7 @@ namespace FileFinder
         {
             Files.Remove(SelectedFile);
             OnPropertyChanged(nameof(Files));
+            ProgressText = $"Pozostało {Files.Count} plików";
         }
         private void IgnoreFolder()
         {
@@ -75,6 +76,7 @@ namespace FileFinder
             if (string.IsNullOrWhiteSpace(folder)) return;
             Files = new ObservableCollection<FileModel>(Files.Where(x => x.RelativePath.Contains(folder) is false));
             OnPropertyChanged(nameof(Files));
+            ProgressText = $"Pozostało {Files.Count} plików";
         }
         private void SetDefaults()
         {
@@ -154,6 +156,7 @@ namespace FileFinder
                 foreach(var file in Files) { file.RelativePath = file.Path.Remove(0,SourceFolderPath.Length+1); }
             }
             OnPropertyChanged(nameof(Files));
+            ProgressText = $"Znaleziono {Files.Count} plików";
         }
 
         private void BrowseSource()
@@ -213,6 +216,14 @@ namespace FileFinder
 
                         string yearMonthFolder = Path.Combine(DestinationFolderPath, creationDate.ToString("yyyy-MM"));
                         string destinationPath = Path.Combine(yearMonthFolder, fileName);
+
+                        int count = 1;
+                        while (File.Exists(destinationPath))
+                        {
+                            string newName = $"{Path.GetFileNameWithoutExtension(fileName)}_({count}){Path.GetExtension(fileName)}";
+                            destinationPath = Path.Combine(yearMonthFolder, newName);
+                            count++;
+                        }
 
                         if (!Directory.Exists(yearMonthFolder))
                         {
