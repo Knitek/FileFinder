@@ -194,57 +194,11 @@ namespace FileFinder
             Progress = 0;
             try
             {
-                await CopyFilesAsync();
+                await _model.CopyFilesAsync(DestinationFolderPath,Files,ProgressUpdate);
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Wystąpił błąd podczas przenoszenia plików: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private async Task CopyFilesAsync()
-        {
-            if (Directory.Exists(DestinationFolderPath))
-            {
-                var totalFiles = Files.Count;
-                var currentFileIndex = 0;
-                foreach (var file in Files)
-                {
-                    try
-                    {
-                        string fileName = Path.GetFileName(file.FileName);
-                        DateTime creationDate = File.GetCreationTime(file.Path);
-
-                        string yearMonthFolder = Path.Combine(DestinationFolderPath, creationDate.ToString("yyyy-MM"));
-                        string destinationPath = Path.Combine(yearMonthFolder, fileName);
-
-                        int count = 1;
-                        while (File.Exists(destinationPath))
-                        {
-                            string newName = $"{Path.GetFileNameWithoutExtension(fileName)}_({count}){Path.GetExtension(fileName)}";
-                            destinationPath = Path.Combine(yearMonthFolder, newName);
-                            count++;
-                        }
-
-                        if (!Directory.Exists(yearMonthFolder))
-                        {
-                            Directory.CreateDirectory(yearMonthFolder);
-                        }
-                        await Task.Run(() => File.Copy(file.Path, destinationPath));
-                        currentFileIndex++;
-                        ProgressUpdate(currentFileIndex);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Obsługa błędów
-                    }
-                }
-
-                Files.Clear();
-                System.Windows.MessageBox.Show("Pliki zostały przeniesione.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                System.Windows.MessageBox.Show("Podany katalog docelowy nie istnieje.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

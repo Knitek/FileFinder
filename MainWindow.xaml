@@ -53,9 +53,9 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding RelativePath}">
-                        <TextBlock.ToolTip>
+                        <!--<TextBlock.ToolTip>
                             <Image Source="{Binding ImagePath}" Width="200" Height="200" />
-                        </TextBlock.ToolTip>
+                        </TextBlock.ToolTip>-->
                     </TextBlock>
                 </DataTemplate>
             </ListBox.ItemTemplate>
